@@ -65,6 +65,19 @@ ol, ul {
   width: 48px;
 }
 
+.square-top {
+  border-top:4px solid #006400;
+}
+.square-left {
+  border-left: 4px solid #006400;
+}
+.square-bottom {
+  border-bottom: 4px solid #006400;
+}
+.square-right {
+  border-right:4px solid #006400;
+}
+
 .square:focus {
   outline: none;
 }
