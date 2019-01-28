@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 
-var ASCII_A = 65;
-var BASE = 9;
+const ASCII_A = 65;
+const BASE = 9;
 
 class App extends Component {
   render() {
@@ -13,6 +13,9 @@ class App extends Component {
 }
 
 class Square extends React.Component {
+
+//  'name' is the row/column indicator (i.e., A0, H8, etc.)
+//  This function adds frame to the square based on the value of name
   class_name (name) {
     var increment = Math.sqrt(BASE);
     var class_name = "square";
@@ -40,9 +43,15 @@ class Square extends React.Component {
 
   render() {
     return (
-      <button className={this.class_name(this.props.name)} id={this.props.name}>
-        {this.props.value}
-      </button>
+      <textarea
+        className={this.class_name(this.props.tag)}
+        id={this.props.id}
+        name={this.props.tag}
+        onClick={this.props.clickHandler}
+        onKeyPress={this.props.keyPressHandler}
+        readOnly={true}
+        value={this.props.value}
+      />
     );
   }
 }
@@ -50,7 +59,6 @@ class Square extends React.Component {
 class Board extends React.Component {
   constructor(props) {
     super(props);
-    //BASE = parseInt(this.props.base);
     this.state = {
       squares: []
     };
@@ -59,30 +67,82 @@ class Board extends React.Component {
     var idx = 0;
     var square_id;
       for(var a = ASCII_A; a < (ASCII_A+BASE); a++) {
-        square_id = String.fromCharCode(a) ;
+        square_id = String.fromCharCode(a);
         for(var i = 0; i < BASE; i++) {
-          var obj = { name: square_id + parseInt(i), value: 'V' };
+          var obj = {
+            name: square_id + parseInt(i),
+            value: '123456789'
+          };
           this.state.squares[idx] = obj;
           idx++;
         }
       }
   }
 
+  handleKeyPress(event) {
+    const ASCII_1 = 49;
+    const ASCII_9 = 57;
+
+    console.log("handling keypress");
+    console.log(event.key);
+
+    var ascii_value = event.key.charCodeAt(0);
+    if(ascii_value < ASCII_1 || ascii_value > ASCII_9) {
+      console.log("not a digit");
+      return;
+    }
+
+    var elements = document.getElementsByClassName('focus');
+    var element = elements[0];
+    var idx = element.id;
+
+    var squares = Array.from(this.state.squares);
+    var value = squares[idx].value;
+    var arr_values = value.split("");
+    var position = arr_values.indexOf(event.key);
+    if(position === -1) {
+      arr_values.push(event.key);
+      arr_values.sort();
+    }
+    else {
+      arr_values.splice(position, 1, '');
+    }
+
+    squares[idx].value = arr_values.join("");
+    this.setState({squares: squares});
+  }
+
+  handleClick(name) {
+    //  toggle the class name 'focus'
+    console.log("handling click");
+    var elements = document.getElementsByClassName('focus');
+    while ( elements.length > 0 ) {
+      elements[0].classList.remove('focus');
+    }
+    var element = document.getElementById(name)
+    element.classList.add('focus');
+  }
+
   renderSquare(idx) {
-    return <Square value={this.state.squares[idx].value} name={this.state.squares[idx].name} />;
+    return <Square
+      value={this.state.squares[idx].value}
+      tag={this.state.squares[idx].name}
+      key={idx}
+      id={idx}
+      clickHandler={() => this.handleClick(idx)}
+      keyPressHandler={(event) => this.handleKeyPress(event)}
+    />;
   }
 
   //  nine squares === one row (assuming base === 9)
   createRow(row) {
-    var base = parseInt(this.props.base);
     var row_idx = row * BASE;
     var squares = [];
     for(var i = 0; i < BASE; i++) {
-      this.state.squares[row_idx + i].value = parseInt(i);
       squares.push( this.renderSquare(row_idx + i ));
     }
 
-    return <div className="board-row">{squares}</div>;
+    return <div className="board-row" key={row} >{squares}</div>;
   }
 
   //  create nine rows (assuming base === 9)
@@ -91,12 +151,15 @@ class Board extends React.Component {
     for (var i = 0; i < BASE; i++) {
       rows.push( this.createRow(i) );
     }
-    return <div className="game-board">{rows}</div>;
+    return (
+    <div className="game-board">
+      {rows}
+    </div>);
   }
 
   render() {
     return (
-      <div className="game">
+      <div className="game" >
         {this.createGrid()}
       </div>
     );

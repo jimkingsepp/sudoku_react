@@ -54,15 +54,29 @@ ol, ul {
   background: #fff;
   border: 1px solid #999;
   float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
+  /*font-size: 24px;*/
+  font-family: "Verdana";
+  font-size: 12px;
+  font-weight: normal;
+  /*line-height: 34px;*/
+  line-height: 14px;
   height: 48px;
   margin-right: -1px;
   margin-top: -1px;
   padding: 0;
+  padding-left: 3px;
+  padding-top: 3px;
+  padding-bottom: 3px;
   text-align: center;
   width: 48px;
+  word-wrap: break-word;
+  word-break: break-all;
+  letter-spacing: 5px;
+  resize: none;
+}
+
+.focus {
+  background: #FAF0E6;
 }
 
 .square-top {
