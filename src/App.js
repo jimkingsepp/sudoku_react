@@ -135,9 +135,10 @@ class Board extends React.Component {
           value = [];
         }
         else {
-          value.splice(position, 1, '');
+          value.splice(position, 1);
         }
       }
+      squares[idx].value = value;
     }
     else {
       squares[idx].value = [event.key];
