@@ -2,6 +2,9 @@ const ASCII_A = 65;
 
 class Sudoku {
   constructor(squares, base) {
+    //  squares should be in Excel-style
+    //    A1 = first cell of first row
+    //    B2 = second cell of second row
     this.squares = squares;
     this.base = base;
 
@@ -47,11 +50,16 @@ class Sudoku {
 
   solve() {
     let stored_squares = this.squaresToString(this.squares);
-    this.clearPencilValues();
+
+    this.setPencilValues();
 
     this.solveNonet(this.nonets);
     this.solveNonet(this.rows);
     this.solveNonet(this.columns);
+
+    this.solveDoubleValues(this.nonets);
+    this.solveDoubleValues(this.rows);
+    this.solveDoubleValues(this.columns);
 
     var new_squares = this.squaresToString(this.squares);
     if(stored_squares !== new_squares) {
@@ -61,6 +69,47 @@ class Sudoku {
     return this.squares;
   }
 
+  solveDoubleValues(nonet) {
+    for(var nonet_idx = 0; nonet_idx < this.base; nonet_idx++) {
+      this.solveDouble(nonet[nonet_idx]);
+    }
+  }
+
+  solveDouble(set) {
+    let locked_values = []; //  array of known values
+    let to_check = [];  //  array of objects with no solution
+
+    for(var idx = 0; idx < set.length; idx++) {
+      if(set[idx].value.length === 2) {
+        locked_values.push(set[idx].value[0]+","+set[idx].value[1]);
+      }
+      else {
+        to_check.push(set[idx]);
+      }
+    }
+
+      //  check for duplicate dupe_values
+      //  save only these into dupe_values
+      let dupe_values = [];
+      locked_values.forEach(
+        function (element, idx) {
+          if(locked_values.indexOf(element,idx+1) > -1) {
+            if(dupe_values.indexOf(element) === -1) {
+              dupe_values.push(element);
+            }
+          }
+        }
+      );
+
+      if(dupe_values.length) {
+        //  loop thru all the objects to to_check
+        //  check value in object against the locked_values
+      for(var dupe_idx = 0; dupe_idx < dupe_values.length; dupe_idx++) {
+        this.checkObjects(to_check, dupe_values[dupe_idx].split(","));
+      }
+    }
+  }
+
   solveNonet(nonet) {
     for(var nonet_idx = 0; nonet_idx < this.base; nonet_idx++) {
       this.solveSet(nonet[nonet_idx]);
@@ -68,9 +117,9 @@ class Sudoku {
   }
 
   solveSet(set) {
-    var solvable_set = set; //  the nonet, row, or column that is being checked
-    var locked_values = []; //  array of known values
-    var to_check = [];  //  array of objects with no solution
+    let solvable_set = set; //  the nonet, row, or column that is being checked
+    let locked_values = []; //  array of known values
+    let to_check = [];  //  array of objects with no solution
 
     //  get list of values that are "locked"
     //  "locked" values are those that are known
@@ -85,23 +134,27 @@ class Sudoku {
         }
       });
 
-
       //  loop thru all the objects to to_check
       //  check value in object against the locked_values
-      for(var idx = 0; idx < to_check.length; idx++) {
-        for (var locked_idx = 0; locked_idx < locked_values.length; locked_idx++) {
-          var locked_val = locked_values[locked_idx];
-          var pos = to_check[idx].value.indexOf(locked_val);
-          if(pos !== -1) {
-            to_check[idx].value.splice(pos, 1);
-          }
-        }
-      }
+      this.checkObjects(to_check,locked_values);
   }
 
-  clearPencilValues() {
+  checkObjects(to_check,locked_values) {
+    for(var idx = 0; idx < to_check.length; idx++) {
+      for (var locked_idx = 0; locked_idx < locked_values.length; locked_idx++) {
+        var locked_val = locked_values[locked_idx];
+        var pos = to_check[idx].value.indexOf(locked_val);
+        if(pos !== -1) {
+          to_check[idx].value.splice(pos, 1);
+        }
+      }
+    }
+  }
+
+//  if there is no value, set value to default values
+  setPencilValues() {
     for(var idx = 0; idx < this.squares.length; idx++) {
-      if(this.squares[idx].value.length !== 1) {
+      if(this.squares[idx].value.length === 0) {
         this.squares[idx].value = this.possible_values.slice();
       }
     }
