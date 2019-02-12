@@ -49,30 +49,34 @@ class Sudoku {
   }
 
   solve() {
+    //  take a snapshot of the values in squares array
     let stored_squares = this.squaresToString(this.squares);
 
     this.setPencilValues();
 
-    this.solveNonet(this.nonets);
-    this.solveNonet(this.rows);
-    this.solveNonet(this.columns);
+    //  straight solve of each nonet
+    for(var idx = 0; idx < this.sets.length; idx++) {
+      var nonet = this.sets[idx];
+      for(var nonet_idx = 0; nonet_idx < nonet.length; nonet_idx++) {
+        this.solveSet(nonet[nonet_idx]);
+      }
+    }
 
-    this.solveDoubleValues(this.nonets);
-    this.solveDoubleValues(this.rows);
-    this.solveDoubleValues(this.columns);
+    //  narrow possible values by checking duplicate pairs
+    for(idx = 0; idx < this.sets.length; idx++) {
+      nonet = this.sets[idx];
+      for(nonet_idx = 0; nonet_idx < nonet.length; nonet_idx++) {
+        this.solveDouble(nonet[nonet_idx]);
+      }
+    }
 
+    //  check snapshot against the revised (solved) values
     var new_squares = this.squaresToString(this.squares);
     if(stored_squares !== new_squares) {
       this.solve();
     }
 
     return this.squares;
-  }
-
-  solveDoubleValues(nonet) {
-    for(var nonet_idx = 0; nonet_idx < this.base; nonet_idx++) {
-      this.solveDouble(nonet[nonet_idx]);
-    }
   }
 
   solveDouble(set) {
@@ -107,12 +111,6 @@ class Sudoku {
       for(var dupe_idx = 0; dupe_idx < dupe_values.length; dupe_idx++) {
         this.checkObjects(to_check, dupe_values[dupe_idx].split(","));
       }
-    }
-  }
-
-  solveNonet(nonet) {
-    for(var nonet_idx = 0; nonet_idx < this.base; nonet_idx++) {
-      this.solveSet(nonet[nonet_idx]);
     }
   }
 
